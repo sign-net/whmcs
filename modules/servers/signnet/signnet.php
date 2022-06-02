@@ -115,23 +115,100 @@ function signnet_ConfigOptions()
  */
 function signnet_CreateAccount(array $params)
 {
+    $err = "";
     try {
-        // Call the service's provisioning function, using the values provided
-        // by WHMCS in `$params`.
-        //
-        // A sample `$params` array may be defined as:
-        //
-        // ```
-        // array(
-        //     'domain' => 'The domain of the service to provision',
-        //     'username' => 'The username to access the new service',
-        //     'password' => 'The password to access the new service',
-        //     'configoption1' => 'The amount of disk space to provision',
-        //     'configoption2' => 'The new services secret key',
-        //     'configoption3' => 'Whether or not to enable FTP',
-        //     ...
-        // )
-        // ```
+        // API Connection Details
+        $whmcsUrl = "https://signing-api.sign.net/provisioning-api/provisionAccount";
+        // For WHMCS 7.2 and later, we recommend using an API Authentication Credential pair.
+        // Learn more at http://docs.whmcs.com/API_Authentication_Credentials
+        // Prior to WHMCS 7.2, an admin username and md5 hash of the admin password may be used
+        // with the 'username' and 'password' keys instead of 'identifier' and 'secret'.
+        // $api_identifier = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJiMmMyM2EyN2E2NTc0MGY3ODc2ZDY2OGNhYjE0NmM5MCIsImlhdCI6MTYzMDg5NjE2N30.OiVCx4NiKXMUh1olQTG-wDSMCw03-B80yGvYShULKTE";
+        // $api_secret = "}ASka}_N;OB7~=H1/,v6K<3]E~WSO^:+V{(naB>DD>;e<}v-8kM|D(`B9$";
+        $duration = [];
+        // use the $params['model'] to access a host of product variables
+        $billingcycle = $params['model']->{'billingcycle'};
+        switch ($billingcycle) {
+            case 'Monthly':
+                $duration = "Monthly";
+            case 'Quarterly':
+                $duration = 'Quarterly';
+            case 'Semi-Annually':
+                $duration = 'Biannual';
+            case 'Annually':
+                $duration = 'Annual';
+
+            
+
+        }
+
+        // print($params['model']->{'billingcycle'});
+        // Set get values
+        // 'internalApiKey' => '}ASka}_N;OB7~=H1/,v6K<3]E~WSO^:+V{(naB>DD>;e<}v-8kM|D(`B9$',
+        if ($params['configoption1'] !==  null) {
+            $postfields = array(
+            "userApiKey" => $params['configoption1'],
+            "userEmail" =>  $params['customfields']['Email'],
+            "userFirstName" => $params['customfields']['First Name'],
+            "userLastName" => $params['customfields']['Last Name'],
+            "password" => $params['customfields']['Password'],
+            "product" => "BusinessAccount",
+            "businessData" => array(
+                "domain" => $params['customfields']['Sub Domain'],
+                "companyName" => $params['customfields']['Company Name'],
+                "duration" => $duration,
+                ),
+            "billingTerms" => 'credits'
+            );
+        }
+        else {
+            $postfields = array(
+                // "userApiKey" => $params['customfields']['User Api Key'],
+                "userEmail" =>  $params['customfields']['Email'],
+                "userFirstName" => $params['customfields']['First Name'],
+                "userLastName" => $params['customfields']['Last Name'],
+                "password" => $params['customfields']['Password'],
+                "product" => "FreeAccount",
+                "businessData" => NULL,
+                "billingTerms" => NULL
+            );
+        }
+        $post = json_encode($postfields);
+
+        $userApiKey = $params['configoption1'];
+        // Call the API
+        $ch = curl_init();
+        curl_setopt($ch, CURLOPT_URL, $whmcsUrl);
+        curl_setopt($ch, CURLOPT_POST, 1);
+        curl_setopt($ch, CURLOPT_TIMEOUT, 30);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 1);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 2);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, $post);
+        if ($userApiKey !== NULL) {curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: application/json',
+            'Authorization: Bearer ' . $userApiKey));}
+
+    
+        $response = curl_exec($ch);
+        if (curl_error($ch)) {
+        die('Unable to connect: ' . curl_errno($ch) . ' - ' . curl_error($ch));
+        }
+        curl_close($ch);
+
+        // Decode response
+        $jsonData = json_decode($response, true);
+
+        // Dump array structure for inspection
+        // var_dump($jsonData);
+        // // Call the service's connection test function.
+        $err = $jsonData['error']['message'];
+        if($err !== null) {
+            $status_code = $jsonData['status'];
+            $err = $jsonData['error']['message'];
+            return $err;
+        }
+        
+        
     } catch (Exception $e) {
         // Record the error in WHMCS's module log.
         logModuleCall(
@@ -142,7 +219,7 @@ function signnet_CreateAccount(array $params)
             $e->getTraceAsString()
         );
 
-        return $e->getMessage();
+        // return $e->getMessage();
     }
 
     return 'success';
