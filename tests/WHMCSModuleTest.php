@@ -17,7 +17,7 @@
 class WHMCSModuleTest extends PHPUnit_Framework_TestCase
 {
     /** @var string $moduleName */
-    protected $moduleName = 'provisioningmodule';
+    protected $moduleName = 'signnet';
 
     /**
      * Asserts the required config options function is defined.
