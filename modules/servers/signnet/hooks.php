@@ -118,3 +118,84 @@ add_hook('ClientAreaSecondarySidebar', 1, function ($secondarySidebar)
 
     }
 });
+
+
+add_hook('ShoppingCartValidateCheckout', 1, function($vars) {
+    try {
+        // API Connection Details
+        $whmcsUrl = "https://signing-api.sign.net/provisioning-api/domainCheck/" . $_SESSION['cart']['products'][0]['customfields'][18] ;
+        // For WHMCS 7.2 and later, we recommend using an API Authentication Credential pair.
+        // Learn more at http://docs.whmcs.com/API_Authentication_Credentials
+        // Prior to WHMCS 7.2, an admin username and md5 hash of the admin password may be used
+        // with the 'username' and 'password' keys instead of 'identifier' and 'secret'.
+        // $api_identifier = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJiMmMyM2EyN2E2NTc0MGY3ODc2ZDY2OGNhYjE0NmM5MCIsImlhdCI6MTYzMDg5NjE2N30.OiVCx4NiKXMUh1olQTG-wDSMCw03-B80yGvYShULKTE";
+        // $api_secret = "}ASka}_N;OB7~=H1/,v6K<3]E~WSO^:+V{(naB>DD>;e<}v-8kM|D(`B9$";
+
+        // Set get values
+        // 'internalApiKey' => '}ASka}_N;OB7~=H1/,v6K<3]E~WSO^:+V{(naB>DD>;e<}v-8kM|D(`B9$',
+       
+        //     $postfields = array(
+        //     "domain" => $vars['customfields']['Sub Domain']
+        //     );
+        // $post = json_encode($postfields);
+
+        $userApiKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI0YWJlZjU4MS05Zjk2LTRkZmItYjJjZC1iNDNlNmFjODZiOTQiLCJpYXQiOjE2NDYwNTI0NDh9._lz7o-KIqWhbCI_d37SbN0cthGVXurvKX21jpZiqeKA";
+        $return = [];
+        // Call the API
+        $ch = curl_init();
+        curl_setopt($ch, CURLOPT_URL, $whmcsUrl);
+        curl_setopt($ch, CURLOPT_POST, 1);
+        curl_setopt($ch, CURLOPT_TIMEOUT, 30);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 1);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 2);
+        curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'GET');
+        curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: application/json',
+            'Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI0YWJlZjU4MS05Zjk2LTRkZmItYjJjZC1iNDNlNmFjODZiOTQiLCJpYXQiOjE2NDYwNTI0NDh9._lz7o-KIqWhbCI_d37SbN0cthGVXurvKX21jpZiqeKA'));
+        // if ($userApiKey != null) {curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: application/json',
+        //     'Authorization: Bearer '. $userApiKey));}
+
+    
+        $response = curl_exec($ch);
+        if (curl_error($ch)) {
+        die('Unable to connect: ' . curl_errno($ch) . ' - ' . curl_error($ch));
+        }
+        curl_close($ch);
+        // print($response);
+        // print($_SESSION['cart']);
+        // Decode response
+        $jsonData = json_decode($response, true);
+
+        // Dump array structure for inspection
+        // // Call the service's connection test function.
+        $status = $jsonData['status'];
+        if($status === 'Err') {
+            $err = $jsonData['error']['message'];
+            $return = $err;
+            // var_dump();
+            // return $return;
+        }
+        $message = $jsonData['message'];
+        if($message !== null) {
+            $return = "API Error, please try again";
+        }
+        var_dump($_SESSION['cart']['products'][0]['customfields']);
+        
+    } catch (Exception $e) {
+        // Record the error in WHMCS's module log.
+        logModuleCall(
+            'signnet',
+            __FUNCTION__,
+            $params,
+            $e->getMessage(),
+            $e->getTraceAsString()
+        );
+        return $e->getMessage();
+
+        // return $e->getMessage();
+    }
+    return $return;
+
+    
+
+});
