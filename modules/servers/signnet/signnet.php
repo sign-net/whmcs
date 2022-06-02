@@ -476,7 +476,7 @@ function signnet_TestConnection(array $params)
 function signnet_AdminCustomButtonArray()
 {
     return array(
-        "Button 1 Display Value" => "buttonOneFunction",
+        "ProvisioningAddOns" => "buttonOneFunction",
         "Button 2 Display Value" => "buttonTwoFunction",
     );
 }
@@ -517,9 +517,65 @@ function signnet_ClientAreaCustomButtonArray()
  */
 function signnet_buttonOneFunction(array $params)
 {
+    $err = '';
     try {
-        // Call the service's function, using the values provided by WHMCS in
-        // `$params`.
+
+        // API Connection Details
+        $whmcsUrl = "http://18.141.231.239:8080/provisioning-api/";
+        // For WHMCS 7.2 and later, we recommend using an API Authentication Credential pair.
+        // Learn more at http://docs.whmcs.com/API_Authentication_Credentials
+        // Prior to WHMCS 7.2, an admin username and md5 hash of the admin password may be used
+        // with the 'username' and 'password' keys instead of 'identifier' and 'secret'.
+        // $api_identifier = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJiMmMyM2EyN2E2NTc0MGY3ODc2ZDY2OGNhYjE0NmM5MCIsImlhdCI6MTYzMDg5NjE2N30.OiVCx4NiKXMUh1olQTG-wDSMCw03-B80yGvYShULKTE";
+        // $api_secret = "}ASka}_N;OB7~=H1/,v6K<3]E~WSO^:+V{(naB>DD>;e<}v-8kM|D(`B9$";
+
+        // Set post values
+        $postfieldss = array(
+            "internalApiKey" => "}ASka}_N;OB7~=H1/,v6K<3]E~WSO^:+V{(naB>DD>;e<}v-8kM|D(`B9$",
+            "userApiKey" => $params['customfields']['userApiKey'],
+            "customerId" => $params['customfields']['customerId'],
+            "amount" => (int)$params['customfields']['amount'],
+            "domain" => $params['customfields']['domain'],
+            "product" => $params['customfields']['product'],
+            "duration" => $params['customfields']['duration'],
+            "BillingTerms" => $params['customfields']['BillingTerms']
+            );
+
+        // $post = "data=".urlencode(json_encode($postfields));
+        $post = json_encode($postfieldss);
+
+        // Call the API
+        $ch = curl_init($whmcsUrl);
+        curl_setopt($ch, CURLOPT_URL, $whmcsUrl . 'ProvisionAddOns');
+        curl_setopt($ch, CURLOPT_POST, 1);
+        curl_setopt($ch, CURLOPT_TIMEOUT, 30);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 1);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 2);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, $post);
+        if ($userApiKey !== NULL) {curl_setopt($ch, CURLOPT_HTTPHEADER, array('content-type: application/json'));}
+        $response = curl_exec($ch);
+        if (curl_error($ch)) {
+        die('Unable to connect: ' . curl_errno($ch) . ' - ' . curl_error($ch));
+        }
+        curl_close($ch);
+        print($response);
+
+        // Decode response
+        
+        $jsonData = json_decode($response, true);
+
+        // Dump array structure for inspection
+        var_dump($jsonData);
+         if($jsonData['status'] !== 200) {
+
+            $status_code = $jsonData['status'];
+
+            $err = $jsonData['error']['message'];
+
+            return $err;
+
+        }
     } catch (Exception $e) {
         // Record the error in WHMCS's module log.
         logModuleCall(
