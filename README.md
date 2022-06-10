@@ -50,7 +50,7 @@ provide a sample unit test based upon the widely used PHPUnit.
 
 
 ## 1.1 Installation System Requirements ##
-Please note that we currently support WHMCS version 8.2.
+Please note that we currently support WHMCS version 8.4.
 Localizations supported: By default, English only.
 
 ## 1.2 Installation Details ##
@@ -65,7 +65,7 @@ Before using the Sign.net WHMCS Module a few things need to be setup:
 1. Create new products that will be distributed to the clients
 2. Configure the product options
 
-## 2.1 Signnet WHMCS Module Product Setup ##
+## 2.1 Sign.net WHMCS Module Product Setup ##
 
 To create new products inside the newly installed and configured Sign.net WHMCS
 Module, please open the WHMCS Settings -> System settings -> Products and
