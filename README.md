@@ -60,7 +60,7 @@ The technical steps required to install the Signnet WHMCS Module are as follows
  Download Sign.netnet WHMCS Module at whmcs/modules/servers/signnet as a zip file at upload folder content
 under WHMCS_DIR/modules/servers
 
-# Signnet WHMCS Module Configuration #
+# Sign.net WHMCS Module Configuration #
 Before using the Sign.net WHMCS Module a few things need to be setup:
 1. Create new products that will be distributed to the clients
 2. Configure the product options
