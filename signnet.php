@@ -462,7 +462,7 @@ function signnet_TestConnection(array $params)
         // Learn more at http://docs.whmcs.com/API_Authentication_Credentials
         // Prior to WHMCS 7.2, an admin username and md5 hash of the admin password may be used
         // with the 'username' and 'password' keys instead of 'identifier' and 'secret'.
-       $success =false
+       $success =false;
     } catch (Exception $e) {
         // Record the error in WHMCS's module log.
         logModuleCall(
