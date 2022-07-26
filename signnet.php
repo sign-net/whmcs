@@ -15,7 +15,7 @@
  *
  * Within the module itself, all functions must be prefixed with the module
  * filename, followed by an underscore, and then the function name. For this
- * example file, the filename is "signnet" and therefore all
+ * example file, the filename is "provisioningmodule" and therefore all
  * functions begin "provisioningmodule_".
  *
  * If your module or third party API does not support a given function, you
@@ -30,9 +30,9 @@
  * @license https://www.whmcs.com/license/ WHMCS Eula
  */
 
-if (!defined("WHMCS")) {
-    die("This file cannot be accessed directly");
-}
+// if (!defined("WHMCS")) {
+//     die("This file cannot be accessed directly");
+// }
 
 // Require any libraries needed for the module to function.
 // require_once __DIR__ . '/path/to/library/loader.php';
@@ -49,6 +49,7 @@ if (!defined("WHMCS")) {
  *
  * @return array
  */
+use DataAccess\DataAccess as DataAccess;
 function signnet_MetaData()
 {
     return array(
@@ -94,6 +95,30 @@ function signnet_ConfigOptions()
             'Size' => '25',
             'Description' => 'Only for business accounts',
         ),
+
+        // the dropdown field type renders a select menu of options
+        // 'Dropdown Field' => array(
+        //     'Type' => 'dropdown',
+        //     'Options' => array(
+        //         'option1' => 'Display Value 1',
+        //         'option2' => 'Second Option',
+        //         'option3' => 'Another Option',
+        //     ),
+        //     'Description' => 'Choose one',
+        // ),
+        // the radio field type displays a series of radio button options
+        // 'Radio Field' => array(
+        //     'Type' => 'radio',
+        //     'Options' => 'First Option,Second Option,Third Option',
+        //     'Description' => 'Choose your option!',
+        // ),
+        // the textarea field type allows for multi-line text input
+        // 'Textarea Field' => array(
+        //     'Type' => 'textarea',
+        //     'Rows' => '3',
+        //     'Cols' => '60',
+        //     'Description' => 'Freeform multi-line text input field',
+        // ),
     );
 }
 
@@ -123,28 +148,10 @@ function signnet_CreateAccount(array $params)
         // Learn more at http://docs.whmcs.com/API_Authentication_Credentials
         // Prior to WHMCS 7.2, an admin username and md5 hash of the admin password may be used
         // with the 'username' and 'password' keys instead of 'identifier' and 'secret'.
-        // $api_identifier = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJiMmMyM2EyN2E2NTc0MGY3ODc2ZDY2OGNhYjE0NmM5MCIsImlhdCI6MTYzMDg5NjE2N30.OiVCx4NiKXMUh1olQTG-wDSMCw03-B80yGvYShULKTE";
-        // $api_secret = "}ASka}_N;OB7~=H1/,v6K<3]E~WSO^:+V{(naB>DD>;e<}v-8kM|D(`B9$";
-        $duration = [];
         // use the $params['model'] to access a host of product variables
-        $billingcycle = $params['model']->{'billingcycle'};
-        switch ($billingcycle) {
-            case 'Monthly':
-                $duration = "Monthly";
-            case 'Quarterly':
-                $duration = 'Quarterly';
-            case 'Semi-Annually':
-                $duration = 'Biannual';
-            case 'Annually':
-                $duration = 'Annual';
 
-            
 
-        }
-
-        // print($params['model']->{'billingcycle'});
         // Set get values
-        // 'internalApiKey' => '}ASka}_N;OB7~=H1/,v6K<3]E~WSO^:+V{(naB>DD>;e<}v-8kM|D(`B9$',
         if ($params['configoption1'] !==  null) {
             $postfields = array(
             "userApiKey" => $params['configoption1'],
@@ -156,7 +163,8 @@ function signnet_CreateAccount(array $params)
             "businessData" => array(
                 "domain" => $params['customfields']['Sub Domain'],
                 "companyName" => $params['customfields']['Company Name'],
-                "duration" => $duration,
+                // "duration" => $duration,
+                "duration" => 'OneTime',
                 ),
             "billingTerms" => 'credits'
             );
@@ -197,7 +205,7 @@ function signnet_CreateAccount(array $params)
 
         // Decode response
         $jsonData = json_decode($response, true);
-
+        logModuleCall("Sign.net-API Data","Provision Account",$post,$response,$jsonData,array());
         // Dump array structure for inspection
         // var_dump($jsonData);
         // // Call the service's connection test function.
@@ -205,25 +213,33 @@ function signnet_CreateAccount(array $params)
         if($err !== null) {
             $status_code = $jsonData['status'];
             $err = $jsonData['error']['message'];
-            return $err;
+            throw new Exception($err);
+            // return $err;
         }
-        
+        logModuleCall(
+            'signnet-Success',
+            __FUNCTION__,
+            $params,
+            $response,
+            $jsonData
+        );
         
     } catch (Exception $e) {
         // Record the error in WHMCS's module log.
         logModuleCall(
-            'signnet',
+            'signnet-error',
             __FUNCTION__,
             $params,
             $e->getMessage(),
             $e->getTraceAsString()
         );
 
-        // return $e->getMessage();
+        return 'error!';
     }
 
     return 'success';
 }
+
 
 /**
  * Suspend an instance of a product/service.
@@ -241,6 +257,7 @@ function signnet_CreateAccount(array $params)
 function signnet_SuspendAccount(array $params)
 {
     try {
+        
         // Call the service's suspend function, using the values provided by
         // WHMCS in `$params`.
     } catch (Exception $e) {
@@ -437,12 +454,15 @@ function signnet_ChangePackage(array $params)
  * @return array
  */
 function signnet_TestConnection(array $params)
-{
-    try {
-        // Call the service's connection test function.
+{        
 
-        $success = true;
-        $errorMsg = '';
+    try {
+        // API Connection Details
+        // For WHMCS 7.2 and later, we recommend using an API Authentication Credential pair.
+        // Learn more at http://docs.whmcs.com/API_Authentication_Credentials
+        // Prior to WHMCS 7.2, an admin username and md5 hash of the admin password may be used
+        // with the 'username' and 'password' keys instead of 'identifier' and 'secret'.
+       $success =false
     } catch (Exception $e) {
         // Record the error in WHMCS's module log.
         logModuleCall(
@@ -469,7 +489,7 @@ function signnet_TestConnection(array $params)
  * Define additional actions that an admin user can perform for an
  * instance of a product/service.
  *
- * @see provisioningmodule_buttonOneFunction()
+ * @see signnet_buttonOneFunction()
  *
  * @return array
  */
@@ -500,97 +520,8 @@ function signnet_ClientAreaCustomButtonArray()
     );
 }
 
-/**
- * Custom function for performing an additional action.
- *
- * You can define an unlimited number of custom functions in this way.
- *
- * Similar to all other module call functions, they should either return
- * 'success' or an error message to be displayed.
- *
- * @param array $params common module parameters
- *
- * @see https://developers.whmcs.com/provisioning-modules/module-parameters/
- * @see provisioningmodule_AdminCustomButtonArray()
- *
- * @return string "success" or an error message
- */
-function signnet_buttonOneFunction(array $params)
-{
-    $err = '';
-    try {
 
-        // API Connection Details
-        $whmcsUrl = "http://18.141.231.239:8080/provisioning-api/";
-        // For WHMCS 7.2 and later, we recommend using an API Authentication Credential pair.
-        // Learn more at http://docs.whmcs.com/API_Authentication_Credentials
-        // Prior to WHMCS 7.2, an admin username and md5 hash of the admin password may be used
-        // with the 'username' and 'password' keys instead of 'identifier' and 'secret'.
-        // $api_identifier = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJiMmMyM2EyN2E2NTc0MGY3ODc2ZDY2OGNhYjE0NmM5MCIsImlhdCI6MTYzMDg5NjE2N30.OiVCx4NiKXMUh1olQTG-wDSMCw03-B80yGvYShULKTE";
-        // $api_secret = "}ASka}_N;OB7~=H1/,v6K<3]E~WSO^:+V{(naB>DD>;e<}v-8kM|D(`B9$";
 
-        // Set post values
-        $postfieldss = array(
-            "internalApiKey" => "}ASka}_N;OB7~=H1/,v6K<3]E~WSO^:+V{(naB>DD>;e<}v-8kM|D(`B9$",
-            "userApiKey" => $params['customfields']['userApiKey'],
-            "customerId" => $params['customfields']['customerId'],
-            "amount" => (int)$params['customfields']['amount'],
-            "domain" => $params['customfields']['domain'],
-            "product" => $params['customfields']['product'],
-            "duration" => $params['customfields']['duration'],
-            "BillingTerms" => $params['customfields']['BillingTerms']
-            );
-
-        // $post = "data=".urlencode(json_encode($postfields));
-        $post = json_encode($postfieldss);
-
-        // Call the API
-        $ch = curl_init($whmcsUrl);
-        curl_setopt($ch, CURLOPT_URL, $whmcsUrl . 'ProvisionAddOns');
-        curl_setopt($ch, CURLOPT_POST, 1);
-        curl_setopt($ch, CURLOPT_TIMEOUT, 30);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 1);
-        curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 2);
-        curl_setopt($ch, CURLOPT_POSTFIELDS, $post);
-        if ($userApiKey !== NULL) {curl_setopt($ch, CURLOPT_HTTPHEADER, array('content-type: application/json'));}
-        $response = curl_exec($ch);
-        if (curl_error($ch)) {
-        die('Unable to connect: ' . curl_errno($ch) . ' - ' . curl_error($ch));
-        }
-        curl_close($ch);
-        print($response);
-
-        // Decode response
-        
-        $jsonData = json_decode($response, true);
-
-        // Dump array structure for inspection
-        var_dump($jsonData);
-         if($jsonData['status'] !== 200) {
-
-            $status_code = $jsonData['status'];
-
-            $err = $jsonData['error']['message'];
-
-            return $err;
-
-        }
-    } catch (Exception $e) {
-        // Record the error in WHMCS's module log.
-        logModuleCall(
-            'signnet',
-            __FUNCTION__,
-            $params,
-            $e->getMessage(),
-            $e->getTraceAsString()
-        );
-
-        return $e->getMessage();
-    }
-
-    return 'success';
-}
 
 /**
  * Custom function for performing an additional action.
@@ -603,7 +534,7 @@ function signnet_buttonOneFunction(array $params)
  * @param array $params common module parameters
  *
  * @see https://developers.whmcs.com/provisioning-modules/module-parameters/
- * @see provisioningmodule_ClientAreaCustomButtonArray()
+ * @see signnet_ClientAreaCustomButtonArray()
  *
  * @return string "success" or an error message
  */
@@ -640,7 +571,7 @@ function signnet_actionOneFunction(array $params)
  * @param array $params common module parameters
  *
  * @see https://developers.whmcs.com/provisioning-modules/module-parameters/
- * @see provisioningmodule_AdminServicesTabFieldsSave()
+ * @see signnet_AdminServicesTabFieldsSave()
  *
  * @return array
  */
@@ -689,7 +620,7 @@ function signnet_AdminServicesTabFields(array $params)
  * @param array $params common module parameters
  *
  * @see https://developers.whmcs.com/provisioning-modules/module-parameters/
- * @see provisioningmodule_AdminServicesTabFields()
+ * @see signnet_AdminServicesTabFields()
  */
 function signnet_AdminServicesTabFieldsSave(array $params)
 {
