@@ -10,7 +10,7 @@ possible.
 
 ## Module Installation
 
-### 1. Donwload
+### 1. Download
 
 Download the file as a zip file. Then go to your WHMCS root folder and place the zip file under the /modules/servers/signnet folder.
 You will need to create the signnet folder and unzip the content in that folder.
