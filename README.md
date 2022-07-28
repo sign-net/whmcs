@@ -77,6 +77,45 @@ Once you have done the following steps and create your product, it should appear
 
 As mentioned earlier you will need a Sign.net reseller API key for this plugin. You can sign up for an account [here](https://resellers.sign.net/auth/register/).
 
+## How to bundle digital signing into your packages
+
+### 1. Acceess the product bundle page
+
+![Main menu](./images/Main%20menu.png)
+On your admin console, look for the tool icon on the top right side of the screen and click on it. Then on the dropdown menu find and click and the "System Settings". Once you reach the System Setting page, find and click on the "Product Bundle" which will bring you to the Product Bundles page
+
+### 2. Create your product bundle
+
+On the Product Bundles page, you click the "Create New Bundle" button and it will bring you to a bundle page
+![Create Bundle1 ](./images/create%20bundle%201.png)
+
+#### 2.1 Write your bundle name
+
+Before you can create your bundle, you will first have to name your bundle and click the "Save Change" button.
+
+#### 2.2 Add a product to your bundle
+
+After you add your bundle name and save the changes, you will see that you will be able to add products to your bundles. These products will have to be existing products that you have already created. Refer to [this](#2-create-the-product-in-the-whmcs-admin-panel) on how you can create a product.
+
+To add a product to your bundle, click on the "Add Another" button under the "Bundle Items" section and it will bring you to the following page
+![Configure Product](./images/configure%20product.png)
+On this page you can select and configure the product. Once you have completed this, it will appear in the "Bundle Items" section
+![Create bundle 2](./images/create%20bundle%202.png)
+
+#### 2.3 Bundle Configuration
+
+In addition to the bundle items, there are other configurations that you can set such as the price, number of maximum uses (number of units of this package that can be sold), availability date for this package, etc... All this should be configured to suit your business needs.
+
+In order for the bundle to show on the Products page, your must check the "Show in Product Group" box. Once that is checked, select the product group that you will to placed this bundle in.
+
+Remember to save your changes when everything is configured.
+
+### 3. Conclusion
+
+Once everything is done, you should be able to see your bundle on the Products and Client's page.
+![Product Page](./images/product%20page.png)
+![Client page](./images/client%20page.png)
+
 ## Useful Resources
 
 - [Developer Resources](https://developers.whmcs.com/)
