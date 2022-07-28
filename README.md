@@ -120,6 +120,20 @@ Once everything is done, you should be able to see your bundle on the Products a
 ![Product Page](./images/product%20page.png)
 ![Client page](./images/client%20page.png)
 
+## Admin Order Approval
+
+For this plugin, we would recommend that you enable the option "Automatically setup the product when you manually accept a pending order" so that an account provisioning only goes through on your appointed admin's approval. To set this up you will need to go to your product page under the "Module Setting" tab then select the "Automatically setup the product when you manually accept a pending order" radio button option.
+![Main Menu 2](./images/main%20Menu%202.png)
+To approve an order, will need to access the order page which you can do by clicking the on the "Orders" option on the top bar and the "Pending Orders" on the drop down menu.
+
+There are 2 ways you can approve your orders.
+![Order List](./images/order%20list.png)
+The first is doing mass approve by clicking on the checkbox on the left most colummn to select the order and then clicking the "Accept Order" button at the bottom of the page
+![Order Page](./images/order%20page.png)
+The second is to click the ID on the 2nd leftmost column which will bring you to the order page. From there you will be able to view the order details and you can choose to approve the order by clicking the "Accept Order".
+
+Once the orders are accepted, the plugin will start the provisioning of the accounts.
+
 ## Useful Resources
 
 - [Developer Resources](https://developers.whmcs.com/)
