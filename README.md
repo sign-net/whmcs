@@ -19,6 +19,10 @@ Once the file is placed, you should be able to see it on your admin console prod
 ### 2. Create the product in the WHMCS Admin panel
 
 In order to get the plug you will need to do the following while creating your product.
+![Main menu](./images/Main%20menu.png)
+You will first need to access the Product page which you can do so by clicking on the "Tool" icon on the top right corner of the admin console. Then you will need to click on the "System Setting" button on the drop down menu which will bring you to the System Setting page. On that page, you will need to look for and click the "Product/Services" option which will bring you to the product page.
+
+On the Product page, you will need a create a product group first before creating your product. Once your product group is created, then you can click on the "Create Product" Button. The next steps will show you how to configure your product to enable the use of the plugin.
 
 #### 2.1 Enter your API
 
