@@ -95,7 +95,17 @@ function signnet_ConfigOptions()
             'Size' => '25',
             'Description' => 'Only for business accounts',
         ),
-
+       'Billing Cycle' => array(
+            'Type' => 'dropdown',
+            'Options' => array(
+                'Monthly' => 'Monthly',
+                'Quarterly' => 'Quarterly',
+                'Biannual' => 'Semi-Annually',
+                'Annual' => 'Annually',
+                'OneTime' => 'One Time',
+            ),
+            'Description' => 'Please choose your preferred biilling cycle for this product. Note: This is for your company billing not your customer',
+        ),
         // the dropdown field type renders a select menu of options
         // 'Dropdown Field' => array(
         //     'Type' => 'dropdown',
@@ -164,7 +174,7 @@ function signnet_CreateAccount(array $params)
                 "domain" => $params['customfields']['Sub Domain'],
                 "companyName" => $params['customfields']['Company Name'],
                 // "duration" => $duration,
-                "duration" => 'OneTime',
+                "duration" => $params['configoption2'],
                 ),
             "billingTerms" => 'credits'
             );
