@@ -36,7 +36,7 @@ Under the Custom Fields Tab you will need to create the following fields with th
 1. Field Name: Sub Domain <br>
    Field Type: Text Box <br>
    Description: Subdomains must be 1 to 63 characters long, consisting only of lowercase letters, numbers or hyphens. <br>
-   Validation: /^[a-z0-9_\-.]\*$/ <br>
+   Validation: <br>
    Radio Buttons: <br>
    Required Field, Show on Order Form<br>
 
@@ -61,7 +61,7 @@ Under the Custom Fields Tab you will need to create the following fields with th
 5. Field Name: Password <br>
    Field Type: Text Box <br>
    Description: Password must contain at least 8 characters, a lowercase letter, an uppercase letter and a number <br>
-   Validation: '^(?=._?[A-Z])(?=._?[a-z])(?=.\*?[0-9]).{8,}$' <br>
+   Validation: ^(?=._?[A-Z])(?=._?[a-z])(?=.\*?[0-9]).{8,}$ <br>
    Radio Buttons: <br>
    Required Field, Show on Order Form <br>
 
